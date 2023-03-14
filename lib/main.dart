@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'Api/ApiSetting.dart';
+import 'Common/DialogService.dart';
 import 'Model/Login/LoginInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'Model/Login/PermissionsEnum.dart';
+import 'View/BetInfoView.dart';
 
 TextEditingController _textAccount = TextEditingController();
 TextEditingController _textPassword = TextEditingController();
@@ -28,26 +31,70 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home Page'),
+        title: Text('登入'),
       ),
       body: Column(
         children:[
-          TextField(
-            controller: _textAccount,
-            decoration: InputDecoration(
-              hintText: '請輸入帳號',
-            ),
+          Row(
+  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  children: [
+    Text(
+      '帳號:',
+      style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),
+    ),
+    SizedBox(width: 10),//增加text與TextField間距
+    Expanded(
+        child: TextField(
+          controller: _textAccount,
+          decoration: InputDecoration(
+            hintText: '請輸入帳號',
           ),
-          TextField(
-            controller: _textPassword,
-            decoration: InputDecoration(
-              hintText: '請輸入密碼',
-            ),
+        ),
+    )
+  ],
+),
+          SizedBox(height: 20),
+          Row(
+  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  children: [
+    Text(
+      '密碼:',
+      style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),
+    ),
+    SizedBox(width: 10),//增加text與TextField間距
+    Expanded(
+        child: TextField(
+          controller: _textPassword,
+          decoration: InputDecoration(
+            hintText: '請輸入密碼',
           ),
+        ),
+    )
+  ],
+),
+          SizedBox(height:40),
           ElevatedButton(
             child: Text('登入'),
-            onPressed: () {
-              GetHttpApi(context);
+            onPressed: () async {
+             var loginInfo = await GetLoginApi(_textAccount.text,_textPassword.text);
+             if(loginInfo.IsSuccess){
+               if(loginInfo.Auth== PermissionsEnum.All){
+                 Navigator.push(
+                   context,
+                   MaterialPageRoute(
+                       builder: (context) => BetInfoView(),
+                       settings: RouteSettings(
+                         arguments: loginInfo.Name,
+                       )
+                   ),
+                 );
+               }
+               else{
+               }
+             }
+             else {
+               ShowToast(context,'登入失敗');
+             }
             },
           ),
         ]
@@ -55,77 +102,9 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-class NextPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    String memberName = ModalRoute.of(context)!.settings.arguments as String;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Next Page'),
-      ),
-      body: Center(
-        child: Text('歡迎登入'+memberName),
-      ),
-    );
-  }
-}
 
-//call api method
-void GetHttpApi(BuildContext context) async{
-  //basic param
 
-  var headers = {
-    'Content-Type': 'application/json'
-  };
-  var request = http.Request('POST', Uri.parse('http://192.168.17.110:8078/TonyTest2/api/login'));
 
-  request.body = json.encode({
-    "Account": _textAccount.text,
-    "Password": _textPassword.text
-  });
-  request.headers.addAll(headers);
-
-  http.StreamedResponse response = await request.send();
-
-  if (response.statusCode == 200) {
-    var bytes = await response.stream.toBytes();
-    var responeText = utf8.decode(bytes);
-    final json=jsonDecode(responeText);
-    var loginInfo =LoginInfoModel.fromJson(json);
-
-    if(loginInfo.IsSuccess){
-      if(loginInfo.Auth== PermissionsEnum.All){
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => NextPage(),
-            settings: RouteSettings(
-              arguments: loginInfo.Name,
-            )
-          ),
-        );
-      }
-    else{
-
-      }
-    }
-    else {
-      ShowToast(context);
-    }
-  }
-  else {
-    ShowToast(context);
-  }
-}
-void ShowToast(BuildContext context) {
-  final scaffold = ScaffoldMessenger.of(context);
-  scaffold.showSnackBar(
-    SnackBar(
-      content: const Text('登入失敗'),
-      action: SnackBarAction(label: '確定', onPressed: scaffold.hideCurrentSnackBar),
-    ),
-  );
-}
 
 
