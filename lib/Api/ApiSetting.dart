@@ -1,12 +1,15 @@
 import 'dart:convert';
-import 'dart:ffi';
+import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../Model/Bet/GetBetInfo.dart';
 import '../Model/Login/LoginInfoModel.dart';
 import '../Model/Login/PermissionsEnum.dart';
 import '../View/BetInfoView.dart';
 import '../main.dart';
+
+//Initial
 
 
 Future<LoginInfoModel> GetLoginApi(String account,String password) async{
@@ -64,4 +67,39 @@ Future<bool> SetBetAmountApi(String amount,String memberid) async{
     return result;
   }
   return result;
+}
+
+Future<List<Map<String, dynamic>>> GetBetAmountApi(String selectYear,String memberid,bool isSettlement) async{
+  //basic param
+  List<Map<String,dynamic>> _data=[];
+  bool result=false;
+
+  var headers = {
+    'Content-Type': 'application/json'
+  };
+  var request = http.Request('POST', Uri.parse('http://192.168.17.110:8078/TonyTest2/api/bet/GetInfo'));
+  request.headers.addAll(headers);
+
+  request.body = json.encode({
+    "SelectYear": selectYear,
+    "MemberID": memberid,
+    "IsSettlement": isSettlement
+  });
+
+  final response = await request.send();
+  if (response.statusCode == 200) {
+    var bytes = await response.stream.toBytes();
+    var responeText = utf8.decode(bytes);
+    final json=jsonDecode(responeText);
+    _data =List<Map<String,dynamic>>.from(json);
+
+    return _data;
+  }
+  return _data;
+}
+
+//
+Future<List<Map<String, dynamic>>> InitialFutureList() async {
+  List<Map<String, dynamic>> myData = [];
+  return myData; // 返回处理好的 List
 }

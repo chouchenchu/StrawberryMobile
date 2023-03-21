@@ -7,9 +7,8 @@ import 'package:http/http.dart' as http;
 import 'Model/Login/PermissionsEnum.dart';
 import 'View/BetInfoView.dart';
 
-TextEditingController _textAccount = TextEditingController();
-TextEditingController _textPassword = TextEditingController();
-
+TextEditingController _textAccount = TextEditingController(text: 'sa');
+TextEditingController _textPassword = TextEditingController(text: '11');
 void main() {
   runApp(MyApp());
 }
@@ -82,7 +81,7 @@ class HomePage extends StatelessWidget {
                  Navigator.push(
                    context,
                    MaterialPageRoute(
-                       builder: (context) => BetInfoView(),
+                       builder: (context) => BetInfoView(key: null,),
                        settings: RouteSettings(
                          arguments: loginInfo.Name,
                        )

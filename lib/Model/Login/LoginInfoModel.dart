@@ -1,4 +1,3 @@
-import 'package:http/http.dart';
 import 'PermissionsEnum.dart';
 
 class LoginInfoModel {
