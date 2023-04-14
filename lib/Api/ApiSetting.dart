@@ -10,15 +10,15 @@ import '../View/BetInfoView.dart';
 import '../main.dart';
 
 //Initial
-
-
+String apuUrl="http://192.168.17.110:8078/TonyTest2/api";
+//登入
 Future<LoginInfoModel> GetLoginApi(String account,String password) async{
   //basic param
   LoginInfoModel loginInfo=LoginInfoModel(Name: "",Auth: PermissionsEnum.All,IsSuccess: false);
   var headers = {
     'Content-Type': 'application/json'
   };
-  var request = http.Request('POST', Uri.parse('http://192.168.17.110:8078/TonyTest2/api/login'));
+  var request = http.Request('POST', Uri.parse(apuUrl+'/login'));
 
   request.body = json.encode({
     "Account": account,
@@ -39,6 +39,7 @@ Future<LoginInfoModel> GetLoginApi(String account,String password) async{
   return loginInfo;
 }
 
+//設定個人賭金
 Future<bool> SetBetAmountApi(String amount,String memberid) async{
   //basic param
   LoginInfoModel loginInfo=LoginInfoModel(Name: "",Auth: PermissionsEnum.All,IsSuccess: false);
@@ -47,7 +48,7 @@ Future<bool> SetBetAmountApi(String amount,String memberid) async{
   var headers = {
     'Content-Type': 'application/json'
   };
-  var request = http.Request('POST', Uri.parse('http://192.168.17.110:8078/TonyTest2/api/bet'));
+  var request = http.Request('POST', Uri.parse(apuUrl+'/bet'));
 
   request.body = json.encode({
     "Amount": amount,
@@ -68,16 +69,17 @@ Future<bool> SetBetAmountApi(String amount,String memberid) async{
   }
   return result;
 }
-
-Future<List<Map<String, dynamic>>> GetBetAmountApi(String selectYear,String memberid,bool isSettlement) async{
+//取得時間內未結賭金
+Future<GetBetInfoModel?> GetBetAmountApi(String selectYear,String memberid,bool isSettlement) async{
   //basic param
   List<Map<String,dynamic>> _data=[];
+  GetBetInfoModel? data;
   bool result=false;
 
   var headers = {
     'Content-Type': 'application/json'
   };
-  var request = http.Request('POST', Uri.parse('http://192.168.17.110:8078/TonyTest2/api/bet/GetInfo'));
+  var request = http.Request('POST', Uri.parse(apuUrl+'/bet/GetInfo'));
   request.headers.addAll(headers);
 
   request.body = json.encode({
@@ -91,15 +93,63 @@ Future<List<Map<String, dynamic>>> GetBetAmountApi(String selectYear,String memb
     var bytes = await response.stream.toBytes();
     var responeText = utf8.decode(bytes);
     final json=jsonDecode(responeText);
-    _data =List<Map<String,dynamic>>.from(json);
+    var data = GetBetInfoModel.fromJson(json);
+    //_data =List<Map<String,dynamic>>.from(json);
 
-    return _data;
+    return data;
   }
-  return _data;
+  return data;
 }
+//賭金基期 Common
+Future<bool> SetCommonBetAmountApi(String amount) async{
+  //basic param
+  bool result=false;
 
-//
-Future<List<Map<String, dynamic>>> InitialFutureList() async {
-  List<Map<String, dynamic>> myData = [];
-  return myData; // 返回处理好的 List
+  var headers = {
+    'Content-Type': 'application/json'
+  };
+  var request = http.Request('POST', Uri.parse(apuUrl+'/common'));
+
+  request.body = json.encode({
+    "BetAmount": amount
+  });
+  request.headers.addAll(headers);
+
+  http.StreamedResponse response = await request.send();
+
+  if (response.statusCode == 200) {
+    var bytes = await response.stream.toBytes();
+    var responeText = utf8.decode(bytes);
+    final json=jsonDecode(responeText);
+    result = json.toString().toLowerCase()=='true';
+    //loginInfo =LoginInfoModel.fromJson(json);
+
+    return result;
+  }
+  return result;
+}
+Future<String> GetCommonBetAmountApi() async{
+  //basic param
+  String result='0';
+
+  var headers = {
+    'Content-Type': 'application/json'
+  };
+  var request = http.Request('POST', Uri.parse(apuUrl+'/common/GetBetAmount'));
+
+  request.body ="";
+  request.headers.addAll(headers);
+
+  http.StreamedResponse response = await request.send();
+
+  if (response.statusCode == 200) {
+    var bytes = await response.stream.toBytes();
+    var responeText = utf8.decode(bytes);
+    final json=jsonDecode(responeText);
+    result = json.toString();
+    //loginInfo =LoginInfoModel.fromJson(json);
+
+    return result;
+  }
+  return result;
 }
