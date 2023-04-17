@@ -93,10 +93,10 @@ Future<GetBetInfoModel?> GetBetAmountApi(String selectYear,String memberid,bool 
     var bytes = await response.stream.toBytes();
     var responeText = utf8.decode(bytes);
     final json=jsonDecode(responeText);
-    var data = GetBetInfoModel.fromJson(json);
+    return GetBetInfoModel.fromJson(json);
     //_data =List<Map<String,dynamic>>.from(json);
 
-    return data;
+    //return data;
   }
   return data;
 }
@@ -138,6 +138,36 @@ Future<String> GetCommonBetAmountApi() async{
   var request = http.Request('POST', Uri.parse(apuUrl+'/common/GetBetAmount'));
 
   request.body ="";
+  request.headers.addAll(headers);
+
+  http.StreamedResponse response = await request.send();
+
+  if (response.statusCode == 200) {
+    var bytes = await response.stream.toBytes();
+    var responeText = utf8.decode(bytes);
+    final json=jsonDecode(responeText);
+    result = json.toString();
+    //loginInfo =LoginInfoModel.fromJson(json);
+
+    return result;
+  }
+  return result;
+}
+//結算賭金
+Future<String> GetProfitLoss(String memberid) async{
+  //basic param
+  String result='0';
+
+  var headers = {
+    'Content-Type': 'application/json'
+  };
+  var request = http.Request('POST', Uri.parse(apuUrl+'/bet/GetSettlementBet'));
+
+  request.body = json.encode({
+    "SelectYear": '',
+    "MemberID": memberid,
+    "IsSettlement": false
+  });
   request.headers.addAll(headers);
 
   http.StreamedResponse response = await request.send();

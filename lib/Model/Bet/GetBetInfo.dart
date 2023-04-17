@@ -15,47 +15,36 @@
  }
 
 }*/
-class GetBetInfoModel {
-  String? profitLossTotal;
-  List<BetInfo>? betInfoList;
-  GetBetInfoModel({required this.profitLossTotal, required this.betInfoList});
-
-  GetBetInfoModel.fromJson(Map<String, dynamic> json) {
-    profitLossTotal = json['ProfitLossTotal'];
-    if (json['BetInfoList'] != null) {
-      betInfoList = <BetInfo>[];
-      json['BetInfoList'].forEach((v) {
-        betInfoList?.add(BetInfo.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['ProfitLossTotal'] = profitLossTotal;
-    data['BetInfoList'] = betInfoList?.map((v) => v.toJson()).toList();
-    return data;
-  }
-}
-
 class BetInfo {
-  String createTime="";
-  String amount="";
-  String profitLoss="";
+  final String createTime;
+  final String amount;
+  final String profitLoss;
 
   BetInfo({required this.createTime, required this.amount, required this.profitLoss});
 
-  BetInfo.fromJson(Map<String, dynamic> json) {
-    createTime = json['createTime'];
-    amount = json['amount'];
-    profitLoss = json['profitLoss'];
+  factory BetInfo.fromJson(Map<String, dynamic> json) {
+    return BetInfo(
+      createTime: json['createTime'],
+      amount: json['amount'],
+      profitLoss: json['profitLoss'],
+    );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['createTime'] = createTime;
-    data['amount'] = amount;
-    data['profitLoss'] = profitLoss;
-    return data;
+class GetBetInfoModel {
+  final String? profitLossTotal ;
+  final List<BetInfo> betInfoList;
+
+  GetBetInfoModel({required this.profitLossTotal, required this.betInfoList});
+
+  factory GetBetInfoModel.fromJson(Map<String, dynamic> json) {
+    var betInfoListJson = json['betInfoList'] as List;
+    List<BetInfo> betInfoList =
+    betInfoListJson.map((betInfoJson) => BetInfo.fromJson(betInfoJson)).toList();
+
+    return GetBetInfoModel(
+      profitLossTotal: json['profitLossTotal'],
+      betInfoList: betInfoList,
+    );
   }
 }
